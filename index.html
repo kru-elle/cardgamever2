@@ -1,0 +1,858 @@
+<!doctype html>
+<html lang="th" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>เกมพลิกการ์ดจับคู่ช่วงวัย</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    html, body {
+      box-sizing: border-box;
+      height: 100%;
+      font-family: 'Prompt', sans-serif;
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    .bg-main {
+      background-image: url('https://img2.pic.in.th/Gemini_Generated_Image_1ay1ik1ay1ik1ay1.png');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+    }
+
+    #game-page {
+      background: linear-gradient(135deg, #A084E8 0%, #8B6DD8 50%, #7656C8 100%);
+      background-attachment: fixed;
+    }
+    
+    @keyframes bounce-letter {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-10px) scale(1.1); }
+    }
+    
+    .title-letter {
+      display: inline-block;
+      animation: bounce-letter 1.5s ease-in-out infinite;
+      -webkit-text-stroke: 1px white;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    @media (min-width: 640px) {
+      .title-letter {
+        -webkit-text-stroke: 2px white;
+        text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+      }
+    }
+    
+    .flip-card {
+      background-color: transparent;
+      width: 100%;
+      aspect-ratio: 1/1;
+      perspective: 1000px;
+      cursor: pointer;
+    }
+    
+    .flip-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+    }
+    
+    .flip-card.flipped .flip-card-inner {
+      transform: rotateY(180deg);
+    }
+    
+    .flip-card-front, .flip-card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      border-radius: 0.75rem;
+      font-size: 0.875rem;
+      padding: 0.5rem;
+      flex-direction: column;
+    }
+    
+    @media (min-width: 640px) {
+      .flip-card-front, .flip-card-back {
+        font-size: 1rem;
+        border-radius: 1rem;
+        padding: 0.75rem;
+      }
+    }
+    
+    @media (min-width: 768px) {
+      .flip-card-front, .flip-card-back {
+        font-size: 1.125rem;
+        border-radius: 1rem;
+        padding: 1rem;
+      }
+    }
+    
+    .flip-card-front {
+      background-image: url('https://img1.pic.in.th/images/Gemini_Generated_Image_mp5binmp5binmp5b.png');
+      background-size: cover;
+      background-position: center;
+      color: white;
+      z-index: 2;
+    }
+    
+    .flip-card-front-emoji {
+      font-size: 0;
+      margin-bottom: 0;
+    }
+    
+    @media (min-width: 640px) {
+      .flip-card-front-emoji {
+        font-size: 0;
+      }
+    }
+    
+    @media (min-width: 768px) {
+      .flip-card-front-emoji {
+        font-size: 0;
+      }
+    }
+    
+    .flip-card-back {
+      background-color: #F36A9A;
+      color: white;
+      transform: rotateY(180deg);
+      text-align: center;
+      font-size: 0.85rem;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+    
+    @media (min-width: 640px) {
+      .flip-card-back {
+        font-size: 1rem;
+        line-height: 1.5;
+      }
+    }
+    
+    @media (min-width: 768px) {
+      .flip-card-back {
+        font-size: 1.1rem;
+        line-height: 1.6;
+      }
+    }
+    
+    .flip-card:not(.disabled):hover .flip-card-front {
+      box-shadow: 0 8px 16px rgba(102, 126, 234, 0.5);
+    }
+    
+    .flip-card.matched .flip-card-front,
+    .flip-card.matched .flip-card-back {
+      border: 3px solid #10b981;
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.6) !important;
+    }
+    
+    .flip-card.disabled {
+      cursor: not-allowed;
+      opacity: 0.8;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+    
+    .btn-danger {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+    }
+    
+    .btn-danger:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(245, 87, 108, 0.4);
+    }
+    
+    .btn-danger:active {
+      transform: translateY(0);
+    }
+    
+    .btn-success {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+    }
+    
+    .btn-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(56, 239, 125, 0.4);
+    }
+    
+    .btn-success:active {
+      transform: translateY(0);
+    }
+    
+    .progress-bar {
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f5576c 100%);
+      transition: width 1s linear;
+    }
+    
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+    
+    .float-animation {
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    input, button {
+      font-family: 'Prompt', sans-serif;
+    }
+  </style>
+  <script src="https://cdn.tailwindcss.com/3.4.17" type="text/javascript"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js" type="text/javascript"></script>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full bg-main overflow-hidden">
+  <div id="app" class="h-full overflow-auto">
+   <!-- หน้าแรก -->
+   <div id="home-page" class="min-h-full flex flex-col items-center justify-center p-3 py-6">
+    <div class="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 max-w-2xl w-full text-center shadow-2xl">
+     <!-- ชื่อเกม -->
+     <h1 id="game-title" class="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-6 sm:mb-8 leading-relaxed"></h1><!-- คำอธิบายสั้น ๆ -->
+     <p class="text-base sm:text-lg md:text-xl font-medium text-gray-800 mb-6 sm:mb-8 px-2">🎮 เล่นเกมจับคู่และเรียนรู้เกี่ยวกับการเจริญเติบโตในแต่ละช่วงวัย</p><!-- กรอกชื่อ -->
+     <div class="mb-6 sm:mb-8">
+      <label class="block text-base sm:text-lg md:text-xl font-bold text-purple-700 mb-3"> <i class="fas fa-user mr-2"></i>ชื่อของคุณ </label> <input type="text" id="player-name" class="w-full px-4 sm:px-5 py-3 sm:py-4 rounded-lg sm:rounded-xl border-2 border-purple-300 focus:border-purple-500 focus:outline-none text-center text-base sm:text-lg md:text-xl font-medium" placeholder="กรอกชื่อของคุณ">
+     </div><!-- ปุ่มเริ่มเกม --> <button onclick="startGame()" class="btn-primary text-white font-bold py-4 sm:py-5 px-8 sm:px-10 rounded-lg sm:rounded-2xl text-xl sm:text-2xl md:text-3xl shadow-lg w-full mb-6 sm:mb-8 hover:shadow-2xl transition-all tracking-wide"> <i class="fas fa-play mr-2"></i>เริ่มเล่นเกม </button><!-- คำอธิบายกติกาสั้น ๆ -->
+     <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 text-left border-2 border-blue-200">
+      <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-blue-800 mb-3 sm:mb-4"><i class="fas fa-lightbulb mr-2"></i>วิธีเล่น</h2>
+      <ul class="space-y-2 sm:space-y-3 text-sm sm:text-base md:text-lg text-gray-800 font-medium">
+       <li>✅ เปิดการ์ดแล้วจับคู่ช่วงวัยกับลักษณะการเจริญเติบโต</li>
+       <li>✅ หาคู่ที่ถูกต้องให้ได้ทั้งหมด</li>
+       <li>✅ มีทั้งหมด 5 ชุด ชุดละ 4 คู่</li>
+       <li>✅ แต่ละชุดมีเวลา 60 วินาที</li>
+       <li>✅ ตอบถูก ข้อละ 10 คะแนน + โบนัส 5 คะแนน/วินาที</li>
+      </ul>
+     </div>
+    </div>
+   </div><!-- หน้าเกม -->
+   <div id="game-page" class="min-h-full flex flex-col p-2 sm:p-3 md:p-4 pb-2 gap-2 sm:gap-3 md:gap-4 hidden">
+    <!-- Header -->
+    <div class="glass-card rounded-lg sm:rounded-xl md:rounded-2xl p-2 sm:p-3 md:p-4 flex-shrink-0">
+     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs sm:text-sm md:text-base mb-2 sm:mb-3">
+      <div class="bg-purple-50 rounded px-2 sm:px-3 py-1.5 sm:py-2">
+       <span class="font-bold text-purple-700"> <i class="fas fa-user mr-1"></i><span id="display-name" class="hidden sm:inline">ผู้เล่น</span> </span>
+      </div>
+      <div class="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded px-2 sm:px-3 py-1.5 sm:py-2 font-bold text-center">
+       <i class="fas fa-layer-group mr-0.5 sm:mr-1"></i>ชุดที่ <span id="current-set">1</span>/5
+      </div>
+      <div class="bg-green-50 rounded px-2 sm:px-3 py-1.5 sm:py-2">
+       <span class="font-bold text-green-600"> <i class="fas fa-star mr-0.5 sm:mr-1"></i><span id="score">0</span> </span>
+      </div>
+      <div class="bg-red-50 rounded px-2 sm:px-3 py-1.5 sm:py-2">
+       <span class="font-bold text-red-500"> <i class="fas fa-clock mr-0.5 sm:mr-1"></i><span id="timer">60</span>ว </span>
+      </div>
+     </div><!-- Progress Bar -->
+     <div class="bg-gray-200 rounded-full h-2 sm:h-3 md:h-4 overflow-hidden">
+      <div id="progress-bar" class="progress-bar h-full rounded-full" style="width: 100%"></div>
+     </div>
+    </div><!-- คำชี้แจง -->
+    <div class="bg-yellow-100 border-l-4 border-yellow-500 p-2 sm:p-3 rounded-r-lg text-xs sm:text-sm md:text-base flex-shrink-0">
+     <p class="text-yellow-800 font-semibold"><i class="fas fa-info-circle mr-1 sm:mr-2"></i> <span id="instruction-display">เปิดการ์ดแล้วจับคู่ช่วงวัยกับลักษณะการเจริญเติบโต</span></p>
+    </div><!-- พื้นที่เกม -->
+    <div class="flex-1 relative min-h-0 overflow-auto">
+     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 p-2 sm:p-3 md:p-4 h-fit w-full" id="game-grid"></div>
+    </div><!-- ปุ่มควบคุม -->
+    <div class="glass-card rounded-lg sm:rounded-xl md:rounded-2xl p-2 sm:p-3 md:p-4 flex-shrink-0">
+     <div class="flex flex-wrap justify-center gap-1.5 sm:gap-2 md:gap-4">
+      <button onclick="resetCards()" class="btn-danger text-white font-bold py-2 px-2.5 sm:py-3 sm:px-4 md:py-3 md:px-6 rounded md:rounded-xl text-xs sm:text-sm md:text-base flex-1 sm:flex-none"> <i class="fas fa-eraser mr-1 hidden sm:inline"></i>รีเซ็ต </button> <button onclick="goHome()" class="btn-primary text-white font-bold py-2 px-2.5 sm:py-3 sm:px-4 md:py-3 md:px-6 rounded md:rounded-xl text-xs sm:text-sm md:text-base flex-1 sm:flex-none"> <i class="fas fa-home mr-1 hidden sm:inline"></i>หน้าแรก </button>
+     </div>
+    </div>
+   </div><!-- หน้าสรุป -->
+   <div id="summary-page" class="min-h-full flex flex-col items-center justify-center p-2 sm:p-3 md:p-4 py-4 sm:py-6 hidden overflow-auto">
+    <div class="glass-card rounded-2xl sm:rounded-3xl p-3 sm:p-4 md:p-6 max-w-3xl w-full shadow-2xl">
+     <div class="text-center mb-3 sm:mb-4 md:mb-6">
+      <div class="text-2xl sm:text-3xl md:text-5xl mb-2">
+       🎉
+      </div>
+      <h2 class="text-lg sm:text-xl md:text-2xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">สรุปผลการเล่น</h2>
+     </div>
+     <div class="grid grid-cols-2 gap-1.5 sm:gap-2 md:gap-3 mb-2 sm:mb-3 md:mb-4">
+      <div class="bg-gradient-to-r from-purple-100 to-purple-200 rounded-lg sm:rounded-xl md:rounded-2xl p-2 sm:p-3 md:p-3 text-center">
+       <i class="fas fa-user text-lg sm:text-xl md:text-2xl text-purple-600 mb-0.5 sm:mb-1"></i>
+       <p class="text-gray-600 text-xs sm:text-sm">ชื่อผู้เล่น</p>
+       <p id="summary-name" class="text-xs sm:text-base md:text-lg font-bold text-purple-700 break-words">-</p>
+      </div>
+      <div class="bg-gradient-to-r from-yellow-100 to-yellow-200 rounded-lg sm:rounded-xl md:rounded-2xl p-2 sm:p-3 md:p-3 text-center">
+       <i class="fas fa-star text-lg sm:text-xl md:text-2xl text-yellow-600 mb-0.5 sm:mb-1"></i>
+       <p class="text-gray-600 text-xs sm:text-sm">คะแนน</p>
+       <p id="summary-score" class="text-xs sm:text-base md:text-lg font-bold text-yellow-700">0</p>
+      </div>
+     </div><!-- สรุปความรู้ -->
+     <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg sm:rounded-xl md:rounded-2xl p-3 sm:p-4 md:p-6 mb-3 sm:mb-4 md:mb-6 max-h-96 overflow-y-auto border-2 border-blue-200">
+      <h3 class="text-sm sm:text-base md:text-lg font-bold text-blue-800 mb-2 sm:mb-3"><i class="fas fa-book mr-2"></i>สรุปความรู้ - ลักษณะการเจริญเติบโตของแต่ละวัย</h3>
+      <div class="space-y-3 sm:space-y-4">
+       <!-- วัยทารก -->
+       <div class="bg-white rounded-lg p-3 sm:p-4 border-l-4 border-red-400">
+        <h4 class="font-bold text-red-700 text-sm sm:text-base md:text-lg mb-2">👶 วัยทารก (อายุ 0–1 ปี)</h4>
+        <ul class="text-sm sm:text-base md:text-lg text-gray-700 space-y-1 ml-4">
+         <li>• ฟันน้ำนมเริ่มขึ้นเมื่ออายุประมาณ 5-6 เดือน</li>
+         <li>• ผิวหนังอ่อนนุ่ม ส่วนใหญ่มีสีชมพู</li>
+         <li>• มีกล้ามเนื้อน้อย แขนและขางออยู่เกือบตลอดเวลา</li>
+        </ul>
+       </div><!-- วัยก่อนเรียน -->
+       <div class="bg-white rounded-lg p-3 sm:p-4 border-l-4 border-orange-400">
+        <h4 class="font-bold text-orange-700 text-sm sm:text-base md:text-lg mb-2">🧒 วัยก่อนเรียน (อายุ 1–6 ปี)</h4>
+        <ul class="text-sm sm:text-base md:text-lg text-gray-700 space-y-1 ml-4">
+         <li>• รูปร่างค่อย ๆ ยืดตัวออก ใบหน้าและศีรษะเล็กลง</li>
+         <li>• ความสูงเพิ่มขึ้นประมาณปีละ 7.5 เซนติเมตร</li>
+         <li>• แขน ขา ลำตัว คอเรียวยาวขึ้น มือและเท้าใหญ่แข็งแรงขึ้น</li>
+        </ul>
+       </div><!-- วัยเรียน -->
+       <div class="bg-white rounded-lg p-3 sm:p-4 border-l-4 border-yellow-400">
+        <h4 class="font-bold text-yellow-700 text-sm sm:text-base md:text-lg mb-2">👦 วัยเรียน (อายุ 7–12 ปี)</h4>
+        <ul class="text-sm sm:text-base md:text-lg text-gray-700 space-y-1 ml-4">
+         <li>• ฟันน้ำนมเริ่มหลุด ฟันแท้งอกขึ้นแทนที่</li>
+         <li>• ส่วนสูงเพิ่มขึ้นประมาณ 4-5 เซนติเมตรต่อปี</li>
+         <li>• น้ำหนักตัวเพิ่มขึ้นประมาณ 2-3 กิโลกรัม</li>
+        </ul>
+       </div><!-- วัยรุ่นชาย -->
+       <div class="bg-white rounded-lg p-3 sm:p-4 border-l-4 border-blue-400">
+        <h4 class="font-bold text-blue-700 text-sm sm:text-base md:text-lg mb-2">🧑 วัยรุ่นชาย (อายุ 13–19 ปี)</h4>
+        <ul class="text-sm sm:text-base md:text-lg text-gray-700 space-y-1 ml-4">
+         <li>• เริ่มมีหนวดเครา เสียงห้าว</li>
+         <li>• ร่างกายขยายใหญ่ ไหล่กว้างขึ้น กล้ามเนื้อแข็งแรง</li>
+         <li>• อัณฑะเริ่มผลิตอสุจิ เจริญเติบโตมากกว่าเด็กผู้หญิง</li>
+        </ul>
+       </div><!-- วัยรุ่นหญิง -->
+       <div class="bg-white rounded-lg p-3 sm:p-4 border-l-4 border-pink-400">
+        <h4 class="font-bold text-pink-700 text-sm sm:text-base md:text-lg mb-2">👧 วัยรุ่นหญิง (อายุ 13–19 ปี)</h4>
+        <ul class="text-sm sm:text-base md:text-lg text-gray-700 space-y-1 ml-4">
+         <li>• ในช่วงแรกจะมีน้ำหนักและส่วนสูงมากกว่าเด็กผู้ชาย</li>
+         <li>• แขนและขายาวขึ้น หน้าอกขยายใหญ่ สะโพกผายออก</li>
+         <li>• เริ่มมีประจำเดือน มีการเปลี่ยนแปลงทางร่างกายและอารมณ์อย่างมาก</li>
+        </ul>
+       </div><!-- วัยผู้ใหญ่ -->
+       <div class="bg-white rounded-lg p-3 sm:p-4 border-l-4 border-green-400">
+        <h4 class="font-bold text-green-700 text-sm sm:text-base md:text-lg mb-2">👨 วัยผู้ใหญ่ (อายุ 40–59 ปี)</h4>
+        <ul class="text-sm sm:text-base md:text-lg text-gray-700 space-y-1 ml-4">
+         <li>• สายตาเริ่มยาว ผิวเริ่มเหี่ยวย่น ไม่เต่งตึง</li>
+         <li>• ร่างกายเริ่มเสื่อมถอย การเคลื่อนไหวช้าลง</li>
+         <li>• น้ำหนักตัวเพิ่มขึ้นจากการสะสมไขมัน หูเริ่มตึง ผมเริ่มหงอก</li>
+        </ul>
+       </div><!-- วัยสูงอายุ -->
+       <div class="bg-white rounded-lg p-3 sm:p-4 border-l-4 border-gray-400">
+        <h4 class="font-bold text-gray-700 text-sm sm:text-base md:text-lg mb-2">👴 วัยสูงอายุ (อายุ 60 ปีขึ้นไป)</h4>
+        <ul class="text-sm sm:text-base md:text-lg text-gray-700 space-y-1 ml-4">
+         <li>• ผมเปลี่ยนเป็นสีขาว หลุดร่วง</li>
+         <li>• ผิวหนังแตกแห้งเหี่ยวย่น ร่างกายหยุดการเจริญเติบโต</li>
+         <li>• สมองเริ่มเสื่อม กล้ามเนื้อลีบ กระดูกเปราะ</li>
+        </ul>
+       </div>
+      </div>
+     </div>
+     <div class="flex flex-wrap justify-center gap-1.5 sm:gap-2 md:gap-4">
+      <button onclick="playAgain()" class="btn-success text-white font-bold py-2 px-3 sm:py-3 sm:px-4 md:py-3 md:px-6 rounded sm:rounded-lg md:rounded-xl text-xs sm:text-sm md:text-base flex-1 sm:flex-none"> <i class="fas fa-redo mr-1 hidden sm:inline"></i>เล่นอีก </button> <button onclick="goHome()" class="btn-primary text-white font-bold py-2 px-3 sm:py-3 sm:px-4 md:py-3 md:px-6 rounded sm:rounded-lg md:rounded-xl text-xs sm:text-sm md:text-base flex-1 sm:flex-none"> <i class="fas fa-home mr-1 hidden sm:inline"></i>หน้าแรก </button>
+     </div>
+    </div>
+   </div>
+  </div>
+  <script>
+    // ข้อมูล 5 ชุด แต่ละชุดมี 4 คู่
+    // Age image mapping
+    const ageImageMap = {
+      "วัยทารก (อายุ 0–1 ปี)": "https://img1.pic.in.th/images/16d210d36ffed19ba.png",
+      "วัยก่อนเรียน (อายุ 1–6 ปี)": "https://img1.pic.in.th/images/203f155a975521ffb.png",
+      "วัยเรียน (อายุ 7–12 ปี)": "https://img1.pic.in.th/images/35ad3c77985ae4809.png",
+      "วัยรุ่นชาย (อายุ 13–19 ปี)": "https://img1.pic.in.th/images/478b31f00fa3382ab.png",
+      "วัยรุ่นหญิง (อายุ 13–19 ปี)": "https://img1.pic.in.th/images/53d29bfa04a7e14b2.png",
+      "วัยผู้ใหญ่ (อายุ 40–59 ปี)": "https://img2.pic.in.th/684bb00478731bf4f.png",
+      "วัยสูงอายุ (อายุ 60 ปีขึ้นไป)": "https://img1.pic.in.th/images/779fb966e2dd90e67.png"
+    };
+
+    const questionSetsData = [
+      // ชุดที่ 1
+      [
+        { age: "วัยสูงอายุ (อายุ 60 ปีขึ้นไป)", emoji: "👴", characteristic: "ผมเริ่มเปลี่ยนเป็นสีขาวและหลุดร่วง" },
+        { age: "วัยก่อนเรียน (อายุ 1–6 ปี)", emoji: "🧒", characteristic: "รูปร่างจะค่อย ๆ ยืดตัวออก" },
+        { age: "วัยเรียน (อายุ 7–12 ปี)", emoji: "👦", characteristic: "ฟันน้ำนมเริ่มหลุด" },
+        { age: "วัยทารก (อายุ 0–1 ปี)", emoji: "👶", characteristic: "มีกล้ามเนื้อน้อย แขนและขางอ" }
+      ],
+      // ชุดที่ 2
+      [
+        { age: "วัยสูงอายุ (อายุ 60 ปีขึ้นไป)", emoji: "👴", characteristic: "ผิวหนังแตกแห้งและเหี่ยวย่น" },
+        { age: "วัยก่อนเรียน (อายุ 1–6 ปี)", emoji: "🧒", characteristic: "ใบหน้าและศีรษะเล็กลงเมื่อเทียบกับขนาดตัว" },
+        { age: "วัยทารก (อายุ 0–1 ปี)", emoji: "👶", characteristic: "ฟันน้ำนมเริ่มขึ้นเมื่ออายุประมาณ 5-6 เดือน" },
+        { age: "วัยผู้ใหญ่ (อายุ 40–59 ปี)", emoji: "👨", characteristic: "ผมเริ่มหงอก" }
+      ],
+      // ชุดที่ 3
+      [
+        { age: "วัยสูงอายุ (อายุ 60 ปีขึ้นไป)", emoji: "👴", characteristic: "สมองเริ่มเสื่อม" },
+        { age: "วัยก่อนเรียน (อายุ 1–6 ปี)", emoji: "🧒", characteristic: "แขน ขา ลำตัว และคอเรียวยาวขึ้น" },
+        { age: "วัยเรียน (อายุ 7–12 ปี)", emoji: "👦", characteristic: "ส่วนสูงเพิ่มขึ้นประมาณ 4-5 เซนติเมตรต่อปี" },
+        { age: "วัยผู้ใหญ่ (อายุ 40–59 ปี)", emoji: "👨", characteristic: "สายตาเริ่มยาว" }
+      ],
+      // ชุดที่ 4
+      [
+        { age: "วัยสูงอายุ (อายุ 60 ปีขึ้นไป)", emoji: "👴", characteristic: "กล้ามเนื้อลีบ กระดูกเปราะ" },
+        { age: "วัยทารก (อายุ 0–1 ปี)", emoji: "👶", characteristic: "ผิวหนังอ่อนนุ่ม ส่วนใหญ่มีสีชมพู" },
+        { age: "วัยรุ่นหญิง (อายุ 13–19 ปี)", emoji: "👧", characteristic: "หน้าอกขยายใหญ่ขึ้น สะโพกผายออก" },
+        { age: "วัยผู้ใหญ่ (อายุ 40–59 ปี)", emoji: "👨", characteristic: "ผิวเริ่มเหี่ยวย่น ไม่เต่งตึง" }
+      ],
+      // ชุดที่ 5
+      [
+        { age: "วัยก่อนเรียน (อายุ 1–6 ปี)", emoji: "🧒", characteristic: "มือและเท้าจะใหญ่และแข็งแรงขึ้น" },
+        { age: "วัยเรียน (อายุ 7–12 ปี)", emoji: "👦", characteristic: "น้ำหนักตัวเพิ่มขึ้นประมาณ 2-3 กิโลกรัม" },
+        { age: "วัยรุ่นชาย (อายุ 13–19 ปี)", emoji: "🧑", characteristic: "ร่างกายขยายใหญ่ ไหล่กว้างขึ้น" },
+        { age: "วัยผู้ใหญ่ (อายุ 40–59 ปี)", emoji: "👨", characteristic: "หูเริ่มตึง" }
+      ]
+    ];
+
+    // Game state
+    let playerName = "";
+    let currentSet = 1;
+    let score = 0;
+    let correctAnswers = 0;
+    let wrongAnswers = 0;
+    let totalTime = 0;
+    let timeLeft = 60;
+    let timerInterval = null;
+    let currentQuestions = [];
+    let allAnswers = [];
+    let gameCards = [];
+    let flippedCards = [];
+    let matchedPairs = 0;
+    let setStartTime = 0;
+    let isProcessing = false;
+
+    // ระบบเสียง (Audio)
+    const flipSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
+    flipSound.volume = 0.7; // ปรับระดับเสียง (0.0 - 1.0)
+
+    // Config
+    const defaultConfig = {
+      game_title: "เกมพลิกการ์ด\nจับคู่ช่วงวัย",
+      instruction_text: "เปิดการ์ดแล้วจับคู่ช่วงวัยกับลักษณะการเจริญเติบโต",
+      primary_color: "#667eea",
+      secondary_color: "#f5576c",
+      accent_color: "#764ba2"
+    };
+
+    let config = { ...defaultConfig };
+
+    // Title colors
+    const titleColors = ['#ef4444', '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#6366f1'];
+
+    function renderTitle() {
+      const title = config.game_title || defaultConfig.game_title;
+      const titleEl = document.getElementById('game-title');
+      titleEl.innerHTML = '';
+      
+      let charIndex = 0;
+      [...title].forEach((char) => {
+        if (char === '\n') {
+          titleEl.appendChild(document.createElement('br'));
+          return;
+        }
+        const span = document.createElement('span');
+        span.className = 'title-letter';
+        span.textContent = char === ' ' ? '\u00A0' : char;
+        span.style.color = titleColors[charIndex % titleColors.length];
+        span.style.animationDelay = `${charIndex * 0.1}s`;
+        titleEl.appendChild(span);
+        charIndex++;
+      });
+    }
+
+    function shuffleArray(array) {
+      const shuffled = [...array];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
+    }
+
+    function generateQuestionSets() {
+      // Return pre-defined sets directly
+      return questionSetsData;
+    }
+
+    let questionSets = [];
+
+    function startGame() {
+      playerName = document.getElementById('player-name').value.trim();
+      
+      if (!playerName) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'กรุณากรอกชื่อ',
+          text: 'กรุณากรอกชื่อของคุณก่อนเริ่มเกม',
+          confirmButtonColor: '#667eea',
+          confirmButtonText: 'ตกลง'
+        });
+        return;
+      }
+      
+      Swal.fire({
+        icon: 'success',
+        title: `ยินดีต้อนรับ ${playerName}!`,
+        text: 'พร้อมเริ่มเล่นเกมจับคู่แล้ว!',
+        confirmButtonText: 'เริ่มเลย!',
+        confirmButtonColor: '#667eea'
+      }).then(() => {
+        currentSet = 1;
+        score = 0;
+        correctAnswers = 0;
+        wrongAnswers = 0;
+        totalTime = 0;
+        allAnswers = [];
+        questionSets = generateQuestionSets();
+        
+        showPage('game-page');
+        loadSet(currentSet);
+      });
+    }
+
+    function loadSet(setNum) {
+      currentQuestions = questionSets[setNum - 1];
+      gameCards = [];
+      flippedCards = [];
+      matchedPairs = 0;
+      timeLeft = 60;
+      setStartTime = Date.now();
+      isProcessing = false;
+      
+      document.getElementById('current-set').textContent = setNum;
+      document.getElementById('display-name').textContent = playerName;
+      document.getElementById('score').textContent = score;
+      document.getElementById('timer').textContent = timeLeft;
+      document.getElementById('progress-bar').style.width = '100%';
+      
+      renderCards();
+      startTimer();
+    }
+
+    function renderCards() {
+      // Create card pairs: age on front, characteristic on back
+      const cards = [];
+      currentQuestions.forEach((q, i) => {
+        cards.push({
+          id: `age-${i}`,
+          index: i,
+          isAge: true,
+          ageId: q.age, // Use age text as unique identifier
+          text: q.age,
+          emoji: q.emoji,
+          pair: `char-${i}`
+        });
+        cards.push({
+          id: `char-${i}`,
+          index: i,
+          isAge: false,
+          ageId: q.age, // Same age text for matching
+          text: q.characteristic,
+          emoji: '✨',
+          pair: `age-${i}`
+        });
+      });
+      
+      const shuffledCards = shuffleArray(cards);
+      gameCards = shuffledCards;
+      
+      const grid = document.getElementById('game-grid');
+      grid.innerHTML = '';
+      
+      shuffledCards.forEach((card, idx) => {
+        const flipCard = document.createElement('div');
+        flipCard.className = 'flip-card';
+        flipCard.dataset.cardId = card.id;
+        flipCard.dataset.ageId = card.ageId;
+        flipCard.dataset.pair = card.pair;
+        
+        const imageUrl = card.isAge ? ageImageMap[card.text] : null;
+        const backContent = card.isAge 
+          ? (imageUrl 
+              ? `<img src="${imageUrl}" alt="${card.text}" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; border-radius: 0.75rem;" onerror="console.error('Image failed to load:', this.src); this.style.background='#e5e7eb'; this.alt='Image unavailable';">` 
+              : `<div>${card.text}</div>`)
+          : `<div>${card.text}</div>`;
+        
+        flipCard.innerHTML = `
+          <div class="flip-card-inner">
+            <div class="flip-card-front">
+              <div class="flip-card-front-emoji"></div>
+            </div>
+            <div class="flip-card-back">
+              ${backContent}
+            </div>
+          </div>
+        `;
+        flipCard.onclick = () => clickCard(flipCard, card);
+        grid.appendChild(flipCard);
+      });
+    }
+
+    function clickCard(element, card) {
+      if (isProcessing) return;
+      if (element.classList.contains('flipped')) return;
+      if (element.classList.contains('matched')) return;
+      if (flippedCards.includes(card.id)) return;
+      
+      // เล่นเสียงพลิกการ์ด
+      try {
+        flipSound.currentTime = 0; // รีเซ็ตเสียงให้เริ่มใหม่ทุกครั้งที่กด
+        flipSound.play().catch(e => console.log('Audio play failed:', e));
+      } catch (err) {}
+      
+      element.classList.add('flipped');
+      flippedCards.push(card.id);
+      
+      if (flippedCards.length === 2) {
+        checkMatch();
+      }
+    }
+
+    function checkMatch() {
+      isProcessing = true;
+      const card1Id = flippedCards[0];
+      const card2Id = flippedCards[1];
+      
+      const el1 = document.querySelector(`[data-card-id="${card1Id}"]`);
+      const el2 = document.querySelector(`[data-card-id="${card2Id}"]`);
+      
+      const ageId1 = el1.dataset.ageId;
+      const ageId2 = el2.dataset.ageId;
+      
+      const isMatch = ageId1 === ageId2;
+      
+      setTimeout(() => {
+        if (isMatch) {
+          el1.classList.add('matched');
+          el2.classList.add('matched');
+          score += 10;
+          correctAnswers++;
+          matchedPairs++;
+          document.getElementById('score').textContent = score;
+          
+          const card1Data = gameCards.find(c => c.id === card1Id);
+          const card2Data = gameCards.find(c => c.id === card2Id);
+          
+          const ageCard = card1Data.isAge ? card1Data : card2Data;
+          const charCard = card1Data.isAge ? card2Data : card1Data;
+          
+          allAnswers.push({
+            age: ageCard.text,
+            correctAnswer: charCard.text,
+            userAnswer: charCard.text,
+            isCorrect: true
+          });
+          
+          flippedCards = [];
+          isProcessing = false;
+          
+          if (matchedPairs === 4) {
+            completeSet();
+          }
+        } else {
+          wrongAnswers++;
+          el1.classList.remove('flipped');
+          el2.classList.remove('flipped');
+          flippedCards = [];
+          isProcessing = false;
+        }
+      }, 600);
+    }
+
+    function completeSet() {
+      clearInterval(timerInterval);
+      const setTime = Math.round((Date.now() - setStartTime) / 1000);
+      totalTime += setTime;
+      
+      // Calculate bonus points: 5 points per second remaining
+      const bonusPoints = timeLeft * 5;
+      score += bonusPoints;
+      document.getElementById('score').textContent = score;
+      
+      setTimeout(() => {
+        Swal.fire({
+          icon: 'success',
+          title: `ชุดที่ ${currentSet} เสร็จสิ้น!`,
+          html: `<p>ถูก: <span class="text-green-600 font-bold">4</span> ข้อ</p>
+                 <p>ผิด: <span class="text-red-600 font-bold">0</span> ข้อ</p>
+                 <p>คะแนนพื้นฐาน: <span class="text-purple-600 font-bold">40</span></p>
+                 <p>โบนัสเวลา: <span class="text-yellow-600 font-bold">+${bonusPoints}</span> (${timeLeft}ว × 5 คะแนน/วินาที)</p>
+                 <p class="text-lg font-bold mt-2">รวม: <span class="text-purple-600">${score}</span> คะแนน</p>`,
+          confirmButtonText: currentSet < 5 ? 'ไปชุดถัดไป' : 'ดูสรุปผล',
+          confirmButtonColor: '#667eea',
+          allowOutsideClick: false
+        }).then(() => {
+          nextSet();
+        });
+      }, 500);
+    }
+
+    function resetCards() {
+      flippedCards = [];
+      isProcessing = false;
+      document.querySelectorAll('.flip-card.flipped:not(.matched)').forEach(card => {
+        card.classList.remove('flipped');
+      });
+    }
+
+    function startTimer() {
+      if (timerInterval) clearInterval(timerInterval);
+      
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        document.getElementById('timer').textContent = timeLeft;
+        document.getElementById('progress-bar').style.width = `${(timeLeft / 60) * 100}%`;
+        
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          handleTimeUp();
+        }
+      }, 1000);
+    }
+
+    function handleTimeUp() {
+      Swal.fire({
+        icon: 'warning',
+        title: 'หมดเวลา!',
+        text: 'ไปชุดถัดไป',
+        confirmButtonText: 'ตกลง',
+        confirmButtonColor: '#667eea',
+        allowOutsideClick: false
+      }).then(() => {
+        nextSet();
+      });
+    }
+
+    function nextSet() {
+      if (currentSet < 5) {
+        currentSet++;
+        loadSet(currentSet);
+      } else {
+        showSummary();
+      }
+    }
+
+    function showSummary() {
+      showPage('summary-page');
+      
+      document.getElementById('summary-name').textContent = playerName;
+      document.getElementById('summary-score').textContent = `${score}`;
+      
+      Swal.fire({
+        icon: 'success',
+        title: 'เสร็จสิ้น! 🎉',
+        text: `คุณได้ ${score} คะแนน`,
+        confirmButtonColor: '#667eea'
+      });
+    }
+
+    function playAgain() {
+      currentSet = 1;
+      score = 0;
+      correctAnswers = 0;
+      wrongAnswers = 0;
+      totalTime = 0;
+      allAnswers = [];
+      questionSets = generateQuestionSets();
+      
+      showPage('game-page');
+      loadSet(currentSet);
+    }
+
+    function goHome() {
+      if (timerInterval) clearInterval(timerInterval);
+      showPage('home-page');
+    }
+
+    function showPage(pageId) {
+      document.getElementById('home-page').classList.add('hidden');
+      document.getElementById('game-page').classList.add('hidden');
+      document.getElementById('summary-page').classList.add('hidden');
+      document.getElementById(pageId).classList.remove('hidden');
+    }
+
+    // Element SDK integration
+    async function onConfigChange(newConfig) {
+      config = { ...defaultConfig, ...newConfig };
+      renderTitle();
+      document.getElementById('instruction-display').textContent = config.instruction_text || defaultConfig.instruction_text;
+    }
+
+    function mapToCapabilities(config) {
+      return {
+        recolorables: [
+          {
+            get: () => config.primary_color || defaultConfig.primary_color,
+            set: (value) => {
+              config.primary_color = value;
+              if (window.elementSdk) window.elementSdk.setConfig({ primary_color: value });
+            }
+          },
+          {
+            get: () => config.secondary_color || defaultConfig.secondary_color,
+            set: (value) => {
+              config.secondary_color = value;
+              if (window.elementSdk) window.elementSdk.setConfig({ secondary_color: value });
+            }
+          },
+          {
+            get: () => config.accent_color || defaultConfig.accent_color,
+            set: (value) => {
+              config.accent_color = value;
+              if (window.elementSdk) window.elementSdk.setConfig({ accent_color: value });
+            }
+          }
+        ]
+      };
+    }
+
+    // Initialize application
+    window.addEventListener('DOMContentLoaded', () => {
+      renderTitle();
+      
+      // Initialize element SDK if available
+      if (window.elementSdk) {
+        window.elementSdk.onConfigChange((newConfig) => {
+          onConfigChange(newConfig);
+          window.elementSdk.updateCapabilities(mapToCapabilities(config));
+        });
+        window.elementSdk.ready();
+      }
+    });
+  </script>
+ </body>
+</html>
