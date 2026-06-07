@@ -1017,39 +1017,40 @@
         const rows = await res.json();
         // schema: [date(0),name(1),cls(2),num(3),total(4),s1-s5(5-9),correct(10),wrong(11),time(12)]
         const data = rows.slice(1).filter(r => r[1]);
-        data.sort((a,b) => (Number(b[4])||0) - (Number(a[4])||0));
+        // schema: [date(0),session(1),name(2),cls(3),num(4),total(5),s1-s5(6-10),correct(11),wrong(12),time(13)]
+        data.sort((a,b) => (Number(b[5])||0) - (Number(a[5])||0));
         document.getElementById('dash-total').textContent = data.length;
-        const scores = data.map(r => Number(r[4])||0);
+        const scores = data.map(r => Number(r[5])||0);
         document.getElementById('dash-top').textContent = scores.length ? Math.max(...scores) : 0;
         document.getElementById('dash-avg').textContent = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : 0;
         if (!data.length) { tbody.innerHTML = '<tr><td colspan="14" class="text-center py-12 text-white/30">ยังไม่มีข้อมูล</td></tr>'; statusEl.textContent = 'ยังไม่มีข้อมูล'; return; }
         const medals = ['🥇','🥈','🥉'];
         tbody.innerHTML = data.map((r,i) => {
-          // schema: [date(0),name(1),cls(2),num(3),total(4),s1(5),s2(6),s3(7),s4(8),s5(9),correct(10),wrong(11),time(12)]
+          // schema: [date(0),session(1),name(2),cls(3),num(4),total(5),s1(6),s2(7),s3(8),s4(9),s5(10),correct(11),wrong(12),time(13)]
           const rank = i < 3 ? medals[i] : `#${i+1}`;
           const dateStr = r[0] ? String(r[0]).replace('T',' ').replace(/\.\d+Z$/,'') : '-';
-          // หา set สุดท้ายที่มีคะแนน (ชุดที่ไปถึง)
-          const setScoresArr = [5,6,7,8,9].map(idx => Number(r[idx])||0);
+          const setScoresArr = [6,7,8,9,10].map(idx => Number(r[idx])||0);
           const lastSet = setScoresArr.reduce((acc, s, idx) => s > 0 ? idx+1 : acc, 0);
           const statusBadge = lastSet >= 5
-            ? `<span class="px-1.5 py-0.5 bg-green-500/30 rounded-full text-green-300 text-xs">✅ ครบ 5 ชุด</span>`
-            : `<span class="px-1.5 py-0.5 bg-yellow-500/20 rounded-full text-yellow-300 text-xs">ถึงชุด ${lastSet}/5</span>`;
+            ? `<span class="inline-block px-2 py-0.5 bg-green-500/30 rounded-full text-green-300 text-xs whitespace-nowrap">✅ ครบ 5 ชุด</span>`
+            : `<span class="inline-block px-2 py-0.5 bg-yellow-500/20 rounded-full text-yellow-300 text-xs whitespace-nowrap">ชุด ${lastSet}/5</span>`;
           const setCell = (val) => val > 0
             ? `<td class="px-2 py-3 text-center text-white/80 font-bold hidden lg:table-cell">${val}</td>`
             : `<td class="px-2 py-3 text-center text-white/30 hidden lg:table-cell">-</td>`;
           return `<tr class="border-t border-white/5 hover:bg-white/5 transition-colors">
             <td class="px-4 py-3 text-center text-lg">${rank}</td>
-            <td class="px-4 py-3 font-semibold text-white">
-              <div>${r[1]||'-'}</div>
-              <div class="mt-0.5">${statusBadge}</div>
+            <td class="px-4 py-3 font-semibold text-white whitespace-nowrap">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span>${r[2]||'-'}</span>${statusBadge}
+              </div>
             </td>
-            <td class="px-4 py-3 text-center text-white/70">${r[2]||'-'}</td>
             <td class="px-4 py-3 text-center text-white/70">${r[3]||'-'}</td>
-            <td class="px-4 py-3 text-center font-black text-2xl text-yellow-300">${Number(r[4])||0}</td>
+            <td class="px-4 py-3 text-center text-white/70">${r[4]||'-'}</td>
+            <td class="px-4 py-3 text-center font-black text-2xl text-yellow-300">${Number(r[5])||0}</td>
             ${setScoresArr.map(s => setCell(s)).join('')}
-            <td class="px-4 py-3 text-center text-green-300 font-bold">${Number(r[10])||0}</td>
-            <td class="px-4 py-3 text-center text-red-300 font-bold">${Number(r[11])||0}</td>
-            <td class="px-4 py-3 text-center text-white/70">${Number(r[12])||0} วิ</td>
+            <td class="px-4 py-3 text-center text-green-300 font-bold">${Number(r[11])||0}</td>
+            <td class="px-4 py-3 text-center text-red-300 font-bold">${Number(r[12])||0}</td>
+            <td class="px-4 py-3 text-center text-white/70">${Number(r[13])||0} วิ</td>
             <td class="px-4 py-3 text-center text-white/40 text-xs hidden md:table-cell">${dateStr}</td>
           </tr>`;
         }).join('');
