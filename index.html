@@ -522,6 +522,7 @@
     let playerName = "";
     let playerClass = "";
     let playerNumber = "";
+    let gameSessionId = "";
     let currentSet = 1;
     let score = 0;
     let scoreAtSetStart = 0;
@@ -628,8 +629,9 @@
         wrongAnswers = 0;
         totalTime = 0;
         allAnswers = [];
+        gameSessionId = Date.now() + '_' + Math.random().toString(36).substr(2, 6);
         questionSets = generateQuestionSets();
-        
+
         showPage('game-page');
         loadSet(currentSet);
       });
@@ -880,6 +882,7 @@
       score = 0;
       scoreAtSetStart = 0;
       setScores = [];
+      gameSessionId = Date.now() + '_' + Math.random().toString(36).substr(2, 6);
       correctAnswers = 0;
       wrongAnswers = 0;
       totalTime = 0;
@@ -947,7 +950,8 @@
       if (statusEl) { statusEl.textContent = '⏳ กำลังบันทึก…'; statusEl.className = 'text-center text-sm font-bold my-2 text-gray-500'; }
       const scores = [0,1,2,3,4].map(i => setScores[i] || 0);
       const params = new URLSearchParams({
-        action: 'save',
+        action:  'save',
+        session: gameSessionId,
         name:    playerName,
         cls:     playerClass,
         num:     playerNumber,
